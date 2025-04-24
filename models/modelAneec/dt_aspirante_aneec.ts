@@ -12,6 +12,7 @@ export interface dt_aspirante_aneecAttributes {
   correo: string;
   fechaNacimiento: string;
   instituto: string;
+  licenciatura: string;
   direccion: string;
   cPostal: string;
   ct_municipio_id: number;
@@ -43,6 +44,7 @@ export class dt_aspirante_aneec extends Model<dt_aspirante_aneecAttributes, dt_a
   correo!: string;
   fechaNacimiento!: string;
   instituto!: string;
+  licenciatura!: string;
   direccion!: string;
   cPostal!: string;
   ct_municipio_id!: number;
@@ -118,6 +120,10 @@ export class dt_aspirante_aneec extends Model<dt_aspirante_aneecAttributes, dt_a
     },
     instituto: {
       type: DataTypes.STRING(100),
+      allowNull: false
+    },
+    licenciatura: {
+      type: DataTypes.STRING(50),
       allowNull: false
     },
     direccion: {
