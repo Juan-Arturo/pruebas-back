@@ -46,44 +46,42 @@ export const createApplicantAneec = async (req: Request, res: Response) => {
   const {
     curp,
     nombre,
-    aPaterno,
-    aMaterno,
+    apellido_paterno,
+    apellido_materno,
     correo,
-    fechaNacimiento,
+    fecha_nacimiento,
     instituto,
     licenciatura,
     direccion,
-    cPostal,
+    codigo_postal,
     ct_municipio_id,
     localidad,
     ct_usuarios_in
   } = req.body;
 
   try {
-
     modelsValidator(req, res); 
 
- 
     const newApplicant = await promette.dt_aspirante_aneec.create({
       curp,
       nombre,
-      aPaterno,
-      aMaterno,
+      apellido_paterno,
+      apellido_materno,
       correo,
-      fechaNacimiento,
+      fecha_nacimiento,
       instituto,
       licenciatura,
       direccion,
-      cPostal,
+      codigo_postal,
       ct_municipio_id,
       localidad,
-      rutaINE: 'simulado_ine.pdf', 
-      rutaComprobanteEstudio: 'simulado_comprobante_estudio.pdf', 
-      rutaComprobanteDomicilio: 'simulado_comprobante_domicilio.pdf', 
-      rutaCartaCompromiso: 'simulado_carta_compromiso.pdf',
-      rutaCartaCompromisoTutor: 'simulado_carta_compromiso_tutor.pdf', 
-      rutaAvisoPrivacidadAspirante: 'simulado_aviso_privacidad_aspirante.pdf', 
-      rutaAvisoPrivacidadUsuario: 'simulado_aviso_privacidad_usuario.pdf',
+      ruta_ine: 'simulado_ine.pdf', 
+      ruta_comprobante_estudio: 'simulado_comprobante_estudio.pdf', 
+      ruta_comprobante_domicilio: 'simulado_comprobante_domicilio.pdf', 
+      ruta_carta_compromiso: 'simulado_carta_compromiso.pdf',
+      ruta_carta_compromiso_tutor: 'simulado_carta_compromiso_tutor.pdf', 
+      ruta_aviso_privacidad_aspirante: 'simulado_aviso_privacidad_aspirante.pdf', 
+      ruta_provacidad_usuario: 'simulado_aviso_privacidad_usuario.pdf',
       ct_usuarios_in
     });
 
@@ -111,4 +109,4 @@ export const getAllApplicantsAneec = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Error al obtener los aspirantes" });
   }
 };
-
+   
