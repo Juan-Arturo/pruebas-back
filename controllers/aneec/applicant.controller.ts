@@ -34,6 +34,7 @@ export const accesoController = async (req: Request, res: Response,) => {
 
 
 //crear nuevo aspirante 
+// ... existing code ...
 export const createApplicantAneec = async (req: Request, res: Response) => {
   const {
     curp,
@@ -53,7 +54,6 @@ export const createApplicantAneec = async (req: Request, res: Response) => {
 
   // Obtener los archivos subidos
   const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-  //console.log("Archivos recibidos:", files); // Verificar los archivos recibidos
 
   try {
     modelsValidator(req, res);
@@ -68,9 +68,16 @@ export const createApplicantAneec = async (req: Request, res: Response) => {
       'ruta_provacidad_usuario'
     ];
 
+    // Verificar si todos los archivos fueron subidos
     for (const field of fileFields) {
       if (!files[field] || files[field].length === 0) {
-        console.warn(`El archivo ${field} no fue subido.`);
+        // Eliminar archivos subidos si estan inclompletos
+        for (const field of fileFields) {
+          if (files[field] && files[field][0]) {
+            fs.unlinkSync(files[field][0].path); // Eliminar archivo subido
+          }
+        }
+        return res.status(400).json({ message: `El archivo ${field} es requerido.` });
       }
     }
 
@@ -88,23 +95,40 @@ export const createApplicantAneec = async (req: Request, res: Response) => {
       codigo_postal,
       ct_municipio_id,
       localidad,
-      ruta_ine: files['ruta_ine'] && files['ruta_ine'][0] ? files['ruta_ine'][0].filename : 'simulado_ine.pdf',
-      ruta_comprobante_estudio: files['ruta_comprobante_estudio'] && files['ruta_comprobante_estudio'][0] ? files['ruta_comprobante_estudio'][0].filename : 'simulado_comprobante_estudio.pdf',
-      ruta_comprobante_domicilio: files['ruta_comprobante_domicilio'] && files['ruta_comprobante_domicilio'][0] ? files['ruta_comprobante_domicilio'][0].filename : 'simulado_comprobante_domicilio.pdf',
-      ruta_carta_compromiso: files['ruta_carta_compromiso'] && files['ruta_carta_compromiso'][0] ? files['ruta_carta_compromiso'][0].filename : 'simulado_carta_compromiso.pdf',
-      ruta_carta_compromiso_tutor: files['ruta_carta_compromiso_tutor'] && files['ruta_carta_compromiso_tutor'][0] ? files['ruta_carta_compromiso_tutor'][0].filename : 'simulado_carta_compromiso_tutor.pdf',
-      ruta_aviso_privacidad_aspirante: files['ruta_aviso_privacidad_aspirante'] && files['ruta_aviso_privacidad_aspirante'][0] ? files['ruta_aviso_privacidad_aspirante'][0].filename : 'simulado_aviso_privacidad_aspirante.pdf',
-      ruta_provacidad_usuario: files['ruta_provacidad_usuario'] && files['ruta_provacidad_usuario'][0] ? files['ruta_provacidad_usuario'][0].filename : 'simulado_aviso_privacidad_usuario.pdf',
+      ruta_ine: files['ruta_ine'][0].filename,
+      ruta_comprobante_estudio: files['ruta_comprobante_estudio'][0].filename,
+      ruta_comprobante_domicilio: files['ruta_comprobante_domicilio'][0].filename,
+      ruta_carta_compromiso: files['ruta_carta_compromiso'][0].filename,
+      ruta_carta_compromiso_tutor: files['ruta_carta_compromiso_tutor'][0].filename,
+      ruta_aviso_privacidad_aspirante: files['ruta_aviso_privacidad_aspirante'][0].filename,
+      ruta_provacidad_usuario: files['ruta_provacidad_usuario'][0].filename,
       ct_usuarios_in
     });
 
     res.status(201).json({ message: "Registro creado exitosamente", data: newApplicant });
   } catch (error) {
     console.error("Error al crear el registro:", error);
-    res.status(500).json({ message:  "Error al crear el registro" });
+
+    // Eliminar archivos subidos en caso de error
+    const fileFields = [
+      'ruta_ine',
+      'ruta_comprobante_estudio',
+      'ruta_comprobante_domicilio',
+      'ruta_carta_compromiso',
+      'ruta_carta_compromiso_tutor',
+      'ruta_aviso_privacidad_aspirante',
+      'ruta_provacidad_usuario'
+    ];
+    for (const field of fileFields) {
+      if (files[field] && files[field][0]) {
+        fs.unlinkSync(files[field][0].path); // Eliminar archivo subido
+      }
+    }
+
+    res.status(500).json({ message: "Error al crear el registro" });
   }
 };
-
+// ... existing code ...
 
 //obtener la lista de aspirantes
 export const getAllApplicantsAneec = async (req: Request, res: Response) => {
