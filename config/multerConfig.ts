@@ -2,6 +2,7 @@ import multer from "multer";
 import multerS3 from "multer-s3";
 import { S3Client } from "@aws-sdk/client-s3";
 import dotenv from "dotenv";
+import path from "path";
 
 // Configuración de dotenv para variables de entorno
 dotenv.config();
@@ -16,17 +17,14 @@ const s3 = new S3Client({
 });
 
 // Configuración de Multer con S3
-const storage = multerS3({
-  s3: s3,
-  bucket: process.env.AWS_S3_BUCKET!, // El nombre del bucket S3
-
-  metadata: function (req, file, cb) {
-    cb(null, { fieldName: file.fieldname });
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, process.env.UPLOAD_BASE_PATH || './uploads');
   },
-  key: function (req, file, cb) {
-    // Generar un nombre único para el archivo
-    const fileName = `${Date.now()}-${file.originalname}`;
-    cb(null, fileName); // El key es el nombre de archivo único
-  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'diagnostico-' + uniqueSuffix + path.extname(file.originalname)); // Ej: "diagnostico-123456789.pdf"
+  }
 });
+
 export default storage;
