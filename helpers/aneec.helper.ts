@@ -1,5 +1,7 @@
 import multer from "multer";
 import path from "path";
+import { v4 as uuidv4 } from 'uuid';
+import fs from 'fs';
 
 // Configuración de Multer con parámetros personalizados
 export const configureMulter = (uploadBasePath: string) => {
@@ -8,7 +10,17 @@ export const configureMulter = (uploadBasePath: string) => {
       cb(null, uploadBasePath);
     },
     filename: function (req, file, cb) {
-      cb(null, Date.now() + path.extname(file.originalname)); // Nombre del archivo: timestamp + extensión
+      const uniqueName = `${uuidv4()}${path.extname(file.originalname)}`;
+      const filePath = path.join(uploadBasePath, uniqueName);
+
+      fs.access(filePath, fs.constants.F_OK, (err) => {
+        if (!err) {
+          const newUniqueName = `${uuidv4()}${path.extname(file.originalname)}`;
+          cb(null, newUniqueName);
+        } else {
+          cb(null, uniqueName);
+        }
+      });
     }
   });
 

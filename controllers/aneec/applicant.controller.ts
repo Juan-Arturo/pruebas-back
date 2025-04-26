@@ -53,12 +53,11 @@ export const createApplicantAneec = async (req: Request, res: Response) => {
 
   // Obtener los archivos subidos
   const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+  //console.log("Archivos recibidos:", files); // Verificar los archivos recibidos
 
   try {
     modelsValidator(req, res);
 
-    // Validar que los archivos se hayan guardado correctamente
-    const uploadPath = `${process.env.UPLOAD_BASE_PATH}/documentsAneec`;
     const fileFields = [
       'ruta_ine',
       'ruta_comprobante_estudio',
@@ -70,11 +69,8 @@ export const createApplicantAneec = async (req: Request, res: Response) => {
     ];
 
     for (const field of fileFields) {
-      if (files[field]) {
-        const filePath = path.join(uploadPath, files[field][0].filename);
-        if (!fs.existsSync(filePath)) {
-          throw new Error(`El archivo ${field} no se guardó correctamente.`);
-        }
+      if (!files[field] || files[field].length === 0) {
+        console.warn(`El archivo ${field} no fue subido.`);
       }
     }
 
@@ -92,13 +88,13 @@ export const createApplicantAneec = async (req: Request, res: Response) => {
       codigo_postal,
       ct_municipio_id,
       localidad,
-      ruta_ine: files['ruta_ine'] ? files['ruta_ine'][0].filename : 'simulado_ine.pdf',
-      ruta_comprobante_estudio: files['ruta_comprobante_estudio'] ? files['ruta_comprobante_estudio'][0].filename : 'simulado_comprobante_estudio.pdf',
-      ruta_comprobante_domicilio: files['ruta_comprobante_domicilio'] ? files['ruta_comprobante_domicilio'][0].filename : 'simulado_comprobante_domicilio.pdf',
-      ruta_carta_compromiso: files['ruta_carta_compromiso'] ? files['ruta_carta_compromiso'][0].filename : 'simulado_carta_compromiso.pdf',
-      ruta_carta_compromiso_tutor: files['ruta_carta_compromiso_tutor'] ? files['ruta_carta_compromiso_tutor'][0].filename : 'simulado_carta_compromiso_tutor.pdf',
-      ruta_aviso_privacidad_aspirante: files['ruta_aviso_privacidad_aspirante'] ? files['ruta_aviso_privacidad_aspirante'][0].filename : 'simulado_aviso_privacidad_aspirante.pdf',
-      ruta_provacidad_usuario: files['ruta_provacidad_usuario'] ? files['ruta_provacidad_usuario'][0].filename : 'simulado_aviso_privacidad_usuario.pdf',
+      ruta_ine: files['ruta_ine'] && files['ruta_ine'][0] ? files['ruta_ine'][0].filename : 'simulado_ine.pdf',
+      ruta_comprobante_estudio: files['ruta_comprobante_estudio'] && files['ruta_comprobante_estudio'][0] ? files['ruta_comprobante_estudio'][0].filename : 'simulado_comprobante_estudio.pdf',
+      ruta_comprobante_domicilio: files['ruta_comprobante_domicilio'] && files['ruta_comprobante_domicilio'][0] ? files['ruta_comprobante_domicilio'][0].filename : 'simulado_comprobante_domicilio.pdf',
+      ruta_carta_compromiso: files['ruta_carta_compromiso'] && files['ruta_carta_compromiso'][0] ? files['ruta_carta_compromiso'][0].filename : 'simulado_carta_compromiso.pdf',
+      ruta_carta_compromiso_tutor: files['ruta_carta_compromiso_tutor'] && files['ruta_carta_compromiso_tutor'][0] ? files['ruta_carta_compromiso_tutor'][0].filename : 'simulado_carta_compromiso_tutor.pdf',
+      ruta_aviso_privacidad_aspirante: files['ruta_aviso_privacidad_aspirante'] && files['ruta_aviso_privacidad_aspirante'][0] ? files['ruta_aviso_privacidad_aspirante'][0].filename : 'simulado_aviso_privacidad_aspirante.pdf',
+      ruta_provacidad_usuario: files['ruta_provacidad_usuario'] && files['ruta_provacidad_usuario'][0] ? files['ruta_provacidad_usuario'][0].filename : 'simulado_aviso_privacidad_usuario.pdf',
       ct_usuarios_in
     });
 
