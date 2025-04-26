@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 
 // Configuración de Multer con parámetros personalizados
-export const configureMulter = (uploadBasePath: string) => {
+export const configureMulterAneec = (uploadBasePath: string) => {
   const storage = multer.diskStorage({
     destination: function (req, file, cb) {
       cb(null, uploadBasePath);

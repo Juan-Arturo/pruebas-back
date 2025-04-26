@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { configureMulter, applicantFields } from "../../helpers/aneec.helper";
+import { configureMulterAneec, applicantFields } from "../../helpers/aneec.helper";
 import {
     accesoController,
     createApplicantAneec,
@@ -11,7 +11,7 @@ import { validateJwt } from "../../middlewares/validate.md";
 const router = Router();
 
 // Configuración de Multer
-const uploadCreateApplicantAnec = configureMulter(`${process.env.UPLOAD_BASE_PATH}/documentsAneec`);
+const uploadCreateApplicantAnec = configureMulterAneec(`${process.env.UPLOAD_BASE_PATH}/documentsAneec`);
 
 
 // Probar acceso al controlador
