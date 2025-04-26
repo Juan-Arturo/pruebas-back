@@ -34,7 +34,6 @@ export const accesoController = async (req: Request, res: Response,) => {
 
 
 //crear nuevo aspirante 
-// ... existing code ...
 export const createApplicantAneec = async (req: Request, res: Response) => {
   const {
     curp,
@@ -128,7 +127,7 @@ export const createApplicantAneec = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Error al crear el registro" });
   }
 };
-// ... existing code ...
+
 
 //obtener la lista de aspirantes
 export const getAllApplicantsAneec = async (req: Request, res: Response) => {
@@ -150,4 +149,3 @@ export const getAllApplicantsAneec = async (req: Request, res: Response) => {
 
 
 
-//obtener documento
