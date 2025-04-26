@@ -1,16 +1,8 @@
 // import { ct_niveles_educativos } from './../../src/models/modelProdep/ct_niveles_educativos';
 import { Request, Response, NextFunction } from "express";
 import { getModels } from "../../models/modelsAnnec"; // Importa los modelos
-import dotenv from "dotenv";
-import axios from 'axios';
-import FormData from 'form-data';
-//interfaces
-const PDFDocument = require('pdfkit');
-import swaggerJSDoc from "swagger-jsdoc";
-import { json } from "sequelize";
-
-import { Writable } from 'stream';
-
+import path from 'path';
+import fs from 'fs';
 //obtencion de modelos
 
 let promette: any;
@@ -59,9 +51,34 @@ export const createApplicantAneec = async (req: Request, res: Response) => {
     ct_usuarios_in
   } = req.body;
 
-  try {
-    modelsValidator(req, res); 
+  // Obtener los archivos subidos
+  const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
+  try {
+    modelsValidator(req, res);
+
+    // Validar que los archivos se hayan guardado correctamente
+    const uploadPath = `${process.env.UPLOAD_BASE_PATH}/documentsAneec`;
+    const fileFields = [
+      'ruta_ine',
+      'ruta_comprobante_estudio',
+      'ruta_comprobante_domicilio',
+      'ruta_carta_compromiso',
+      'ruta_carta_compromiso_tutor',
+      'ruta_aviso_privacidad_aspirante',
+      'ruta_provacidad_usuario'
+    ];
+
+    for (const field of fileFields) {
+      if (files[field]) {
+        const filePath = path.join(uploadPath, files[field][0].filename);
+        if (!fs.existsSync(filePath)) {
+          throw new Error(`El archivo ${field} no se guardó correctamente.`);
+        }
+      }
+    }
+
+    // Si todos los archivos se guardaron correctamente, proceder con el registro en la base de datos
     const newApplicant = await promette.dt_aspirante_aneec.create({
       curp,
       nombre,
@@ -75,20 +92,20 @@ export const createApplicantAneec = async (req: Request, res: Response) => {
       codigo_postal,
       ct_municipio_id,
       localidad,
-      ruta_ine: 'simulado_ine.pdf', 
-      ruta_comprobante_estudio: 'simulado_comprobante_estudio.pdf', 
-      ruta_comprobante_domicilio: 'simulado_comprobante_domicilio.pdf', 
-      ruta_carta_compromiso: 'simulado_carta_compromiso.pdf',
-      ruta_carta_compromiso_tutor: 'simulado_carta_compromiso_tutor.pdf', 
-      ruta_aviso_privacidad_aspirante: 'simulado_aviso_privacidad_aspirante.pdf', 
-      ruta_provacidad_usuario: 'simulado_aviso_privacidad_usuario.pdf',
+      ruta_ine: files['ruta_ine'] ? files['ruta_ine'][0].filename : 'simulado_ine.pdf',
+      ruta_comprobante_estudio: files['ruta_comprobante_estudio'] ? files['ruta_comprobante_estudio'][0].filename : 'simulado_comprobante_estudio.pdf',
+      ruta_comprobante_domicilio: files['ruta_comprobante_domicilio'] ? files['ruta_comprobante_domicilio'][0].filename : 'simulado_comprobante_domicilio.pdf',
+      ruta_carta_compromiso: files['ruta_carta_compromiso'] ? files['ruta_carta_compromiso'][0].filename : 'simulado_carta_compromiso.pdf',
+      ruta_carta_compromiso_tutor: files['ruta_carta_compromiso_tutor'] ? files['ruta_carta_compromiso_tutor'][0].filename : 'simulado_carta_compromiso_tutor.pdf',
+      ruta_aviso_privacidad_aspirante: files['ruta_aviso_privacidad_aspirante'] ? files['ruta_aviso_privacidad_aspirante'][0].filename : 'simulado_aviso_privacidad_aspirante.pdf',
+      ruta_provacidad_usuario: files['ruta_provacidad_usuario'] ? files['ruta_provacidad_usuario'][0].filename : 'simulado_aviso_privacidad_usuario.pdf',
       ct_usuarios_in
     });
 
     res.status(201).json({ message: "Registro creado exitosamente", data: newApplicant });
   } catch (error) {
     console.error("Error al crear el registro:", error);
-    res.status(500).json({ message: "Error al crear el registro" });
+    res.status(500).json({ message:  "Error al crear el registro" });
   }
 };
 
@@ -110,3 +127,7 @@ export const getAllApplicantsAneec = async (req: Request, res: Response) => {
   }
 };
    
+
+
+
+//obtener documento
