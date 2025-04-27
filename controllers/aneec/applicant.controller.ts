@@ -25,8 +25,11 @@ const modelsValidator = async (req: Request, res: Response,) => {
   }
 
 }
+
+
 //METODOS DEL CONTROLADOR//
 
+//metodo de control
 export const accesoController = async (req: Request, res: Response,) => {
 
   res.status(200).json({message:"ACCESO CORRECTO"});
@@ -136,9 +139,6 @@ export const createApplicantAneec = async (req: Request, res: Response) => {
   }
 };
 
-
-
-
 //obtener la lista de aspirantes
 export const getAllApplicantsAneec = async (req: Request, res: Response) => {
   try {
@@ -156,7 +156,6 @@ export const getAllApplicantsAneec = async (req: Request, res: Response) => {
   }
 };
    
-
 //Obtener municipios de la base de datos
 export const getAllMunicipalities = async (req: Request, res: Response) => {
   try{
@@ -172,7 +171,6 @@ export const getAllMunicipalities = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, message: "Error al obtener los municipios" });
   }
 }
-
 
 //actualizar aspirante(evaluador) annec 
 export const updateApplicantAneec = async (req: Request, res: Response) => {
@@ -318,8 +316,6 @@ export const updateApplicantAneec = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, message: "Error al actualizar el aspirante" });
   }
 };
-
-
 
 //Metodo para obtener un documento en esfecifio de un aspirante 
 export const getSpecificDocuments = async (req: Request, res: Response): Promise<void> => {
