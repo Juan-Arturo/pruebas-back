@@ -5,7 +5,8 @@ import {
     createApplicantAneec,
     getAllApplicantsAneec,
     updateApplicantAneec,
-    getAllMunicipalities
+    getAllMunicipalities,
+    getSpecificDocuments
 } from "../../controllers/aneec/applicant.controller";
 import { validateRequest } from "../../middlewares/validateRequest.md";
 import { validateJwt } from "../../middlewares/validate.md";
@@ -30,5 +31,8 @@ router.put("/updateApplicantAnec", uploadCreateUpdateApplicantAnec.fields(applic
 
 //Obtener los municipios
 router.get("/getMunicipalities", getAllMunicipalities)
+
+//metodo para obtener un documento espesifico de un aspirante
+router.get("/getSpecificDocuments/:fileRoute", getSpecificDocuments);
 
 export default router;

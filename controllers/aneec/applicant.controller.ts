@@ -321,3 +321,32 @@ export const updateApplicantAneec = async (req: Request, res: Response) => {
 
 
 
+//Metodo para obtener un documento en esfecifio de un aspirante 
+export const getSpecificDocuments = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const {fileRoute } = req.params;
+
+    modelsValidator(req, res);
+
+    const rutaInfografia = fileRoute;
+    const uploadBasePath = `${process.env.UPLOAD_BASE_PATH}/documentsAneec/` || '';
+
+    const rutaCompleta = path.join(uploadBasePath, rutaInfografia);
+
+    // Verificar si el archivo existe
+    if (!fs.existsSync(rutaCompleta)) {
+      res.status(404).json({ success: false, message: "Archivo no encontrado" });
+      return;
+    }
+
+    // Enviar el archivo como respuesta
+    res.sendFile(rutaCompleta);
+  } catch (error) {
+    console.error("Error al obtener el documento:", error);
+    res.status(400).json({
+      success: false,
+      message: "Error al obtener el documento",
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+};
