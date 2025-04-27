@@ -4,7 +4,8 @@ import {
     accesoController,
     createApplicantAneec,
     getAllApplicantsAneec,
-    updateApplicantAneec
+    updateApplicantAneec,
+    getAllMunicipalities
 } from "../../controllers/aneec/applicant.controller";
 import { validateRequest } from "../../middlewares/validateRequest.md";
 import { validateJwt } from "../../middlewares/validate.md";
@@ -26,5 +27,8 @@ router.get("/getApplicantsAneec", getAllApplicantsAneec);
 
 // Actualizar aspirante con archivos
 router.put("/updateApplicantAnec", uploadCreateUpdateApplicantAnec.fields(applicantFields()), updateApplicantAneec);
+
+//Obtener los municipios
+router.get("/getMunicipalities", getAllMunicipalities)
 
 export default router;
