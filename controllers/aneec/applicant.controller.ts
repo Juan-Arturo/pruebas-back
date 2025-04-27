@@ -150,6 +150,7 @@ export const getAllApplicantsAneec = async (req: Request, res: Response) => {
    
 
 
+
 //actualizar aspirante(evaluador) annec 
 export const updateApplicantAneec = async (req: Request, res: Response) => {
   const {
@@ -189,7 +190,9 @@ export const updateApplicantAneec = async (req: Request, res: Response) => {
       ];
       for (const field of fileFields) {
         if (files[field] && files[field][0]) {
-          fs.unlinkSync(files[field][0].path); // Eliminar archivo subido
+          if (fs.existsSync(files[field][0].path)) { // Verificar si el archivo existe
+            fs.unlinkSync(files[field][0].path); // Eliminar archivo subido
+          }
         }
       }
       return res.status(404).json({ message: "Aspirante no encontrado" });
@@ -210,7 +213,10 @@ export const updateApplicantAneec = async (req: Request, res: Response) => {
     for (const field of fileFields) {
       if (files[field] && files[field][0]) {
         if (existingApplicant[field]) {
-          fs.unlinkSync(path.join(__dirname, '..', 'uploads', existingApplicant[field])); // Eliminar archivo antiguo
+          const oldFilePath = path.join(process.env.UPLOAD_BASE_PATH || '', 'documentsAneec', existingApplicant[field]);
+          if (fs.existsSync(oldFilePath)) { // Verificar si el archivo existe
+            fs.unlinkSync(oldFilePath); // Eliminar archivo antiguo
+          }
         }
       }
     }
@@ -255,7 +261,9 @@ export const updateApplicantAneec = async (req: Request, res: Response) => {
     ];
     for (const field of fileFields) {
       if (files[field] && files[field][0]) {
-        fs.unlinkSync(files[field][0].path); // Eliminar archivo subido
+        if (fs.existsSync(files[field][0].path)) { // Verificar si el archivo existe
+          fs.unlinkSync(files[field][0].path); // Eliminar archivo subido
+        }
       }
     }
 
