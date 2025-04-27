@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from "express";
 import { getModels } from "../../models/modelsAnnec"; // Importa los modelos
 import path from 'path';
 import fs from 'fs';
+import { Op } from 'sequelize';
 //obtencion de modelos
 
 let promette: any;
@@ -35,20 +36,8 @@ export const accesoController = async (req: Request, res: Response,) => {
 
 //crear nuevo aspirante 
 export const createApplicantAneec = async (req: Request, res: Response) => {
-  const {
-    curp,
-    nombre,
-    apellido_paterno,
-    apellido_materno,
-    correo,
-    fecha_nacimiento,
-    instituto,
-    licenciatura,
-    direccion,
-    codigo_postal,
-    ct_municipio_id,
-    localidad,
-    ct_usuarios_in
+  const {curp,nombre,apellido_paterno,apellido_materno,correo,fecha_nacimiento,instituto,
+    licenciatura,direccion,codigo_postal,ct_municipio_id,localidad,ct_usuarios_in
   } = req.body;
 
   // Obtener los archivos subidos
@@ -57,10 +46,27 @@ export const createApplicantAneec = async (req: Request, res: Response) => {
   try {
     modelsValidator(req, res);
 
+    // Verificar si la CURP ya existe en la base de datos
+    const existingApplicant = await promette.dt_aspirante_aneec.findOne({ where: { curp } });
+    if (existingApplicant) {
+      // Eliminar archivos subidos si la CURP ya existe
+      const fileFields = [
+        'ruta_ine','ruta_comprobante_estudio','ruta_comprobante_domicilio',
+        'ruta_carta_compromiso','ruta_carta_compromiso_tutor','ruta_aviso_privacidad_aspirante',
+        'ruta_provacidad_usuario'
+      ];
+      for (const field of fileFields) {
+        if (files[field] && files[field][0]) {
+          if (fs.existsSync(files[field][0].path)) { // Verificar si el archivo existe
+            fs.unlinkSync(files[field][0].path); // Eliminar archivo subido
+          }
+        }
+      }
+      return res.status(400).json({ message: "La CURP ya está registrada" });
+    }
+
     const fileFields = [
-      'ruta_ine',
-      'ruta_comprobante_estudio',
-      'ruta_comprobante_domicilio',
+      'ruta_ine','ruta_comprobante_estudio','ruta_comprobante_domicilio',
       'ruta_carta_compromiso',
       'ruta_carta_compromiso_tutor',
       'ruta_aviso_privacidad_aspirante',
@@ -120,7 +126,9 @@ export const createApplicantAneec = async (req: Request, res: Response) => {
     ];
     for (const field of fileFields) {
       if (files[field] && files[field][0]) {
-        fs.unlinkSync(files[field][0].path); // Eliminar archivo subido
+        if (fs.existsSync(files[field][0].path)) { // Verificar si el archivo existe
+          fs.unlinkSync(files[field][0].path); // Eliminar archivo subido
+        }
       }
     }
 
@@ -196,6 +204,31 @@ export const updateApplicantAneec = async (req: Request, res: Response) => {
         }
       }
       return res.status(404).json({ message: "Aspirante no encontrado" });
+    }
+
+    // Verificar si la CURP ya existe en la base de datos (excepto para el mismo aspirante)
+    const existingApplicantWithCurp = await promette.dt_aspirante_aneec.findOne({ 
+      where: { curp, id_aspirante: { [Op.ne]: id_aspirante } } // Excluir el mismo aspirante
+    });
+    if (existingApplicantWithCurp) {
+      // Eliminar archivos subidos si la CURP ya existe
+      const fileFields = [
+        'ruta_ine',
+        'ruta_comprobante_estudio',
+        'ruta_comprobante_domicilio',
+        'ruta_carta_compromiso',
+        'ruta_carta_compromiso_tutor',
+        'ruta_aviso_privacidad_aspirante',
+        'ruta_provacidad_usuario'
+      ];
+      for (const field of fileFields) {
+        if (files[field] && files[field][0]) {
+          if (fs.existsSync(files[field][0].path)) { // Verificar si el archivo existe
+            fs.unlinkSync(files[field][0].path); // Eliminar archivo subido
+          }
+        }
+      }
+      return res.status(400).json({ message: "La CURP ya está registrada en otro aspirante" });
     }
 
     // Lista de campos de archivos
