@@ -110,9 +110,9 @@ export const createApplicantAneec = async (req: Request, res: Response) => {
       ct_usuarios_in
     });
 
-    res.status(201).json({ message: "Registro creado exitosamente", data: newApplicant });
+    res.status(201).json({success: true, message: "Registro creado exitosamente", data: newApplicant });
   } catch (error) {
-    console.error("Error al crear el registro:", error);
+   
 
     // Eliminar archivos subidos en caso de error
     const fileFields = [
@@ -132,7 +132,7 @@ export const createApplicantAneec = async (req: Request, res: Response) => {
       }
     }
 
-    res.status(500).json({ message: "Error al crear el registro" });
+    res.status(500).json({success: false, message: "Error al crear el registro" });
   }
 };
 
@@ -149,14 +149,29 @@ export const getAllApplicantsAneec = async (req: Request, res: Response) => {
     const applicants = await promette.dt_aspirante_aneec.findAll();
 
     // Devuelve los registros encontrados
-    res.status(200).json({ message: "Aspirantes obtenidos exitosamente", applicants: applicants });
+    res.status(200).json({ success: true, applicants: applicants });
   } catch (error) {
-    console.error("Error al obtener los aspirantes:", error);
-    res.status(500).json({ message: "Error al obtener los aspirantes" });
+
+    res.status(500).json({ success: false, message: "Error al obtener los aspirantes" });
   }
 };
    
 
+//Obtener municipios de la base de datos
+export const getAllMunicipalities = async (req: Request, res: Response) => {
+  try{
+    //verificar si los moelos estan disponibles 
+    modelsValidator(req,res)
+    
+    const municipalities = await promette.ct_municipio.findAll();
+
+    //devolvemos los registros (municipios)
+   res.status(200).json({success: true, municipios: municipalities })
+
+  }catch(error){
+    res.status(500).json({ success: false, message: "Error al obtener los municipios" });
+  }
+}
 
 
 //actualizar aspirante(evaluador) annec 
@@ -228,7 +243,7 @@ export const updateApplicantAneec = async (req: Request, res: Response) => {
           }
         }
       }
-      return res.status(400).json({ message: "La CURP ya está registrada en otro aspirante" });
+      return res.status(400).json({success: false, message: "La CURP ya está registrada en otro aspirante" });
     }
 
     // Lista de campos de archivos
@@ -278,7 +293,7 @@ export const updateApplicantAneec = async (req: Request, res: Response) => {
       ct_usuarios_in
     });
 
-    res.status(200).json({ message: "Aspirante actualizado exitosamente", data: updatedApplicant });
+    res.status(200).json({success: true,  message: "Aspirante actualizado exitosamente", data: updatedApplicant });
   } catch (error) {
     console.error("Error al actualizar el aspirante:", error);
 
@@ -300,7 +315,7 @@ export const updateApplicantAneec = async (req: Request, res: Response) => {
       }
     }
 
-    res.status(500).json({ message: "Error al actualizar el aspirante" });
+    res.status(500).json({ success: false, message: "Error al actualizar el aspirante" });
   }
 };
 
