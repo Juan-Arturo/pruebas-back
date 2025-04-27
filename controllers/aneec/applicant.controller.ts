@@ -129,6 +129,8 @@ export const createApplicantAneec = async (req: Request, res: Response) => {
 };
 
 
+
+
 //obtener la lista de aspirantes
 export const getAllApplicantsAneec = async (req: Request, res: Response) => {
   try {
@@ -146,6 +148,120 @@ export const getAllApplicantsAneec = async (req: Request, res: Response) => {
   }
 };
    
+
+
+//actualizar aspirante(evaluador) annec 
+export const updateApplicantAneec = async (req: Request, res: Response) => {
+  const {
+    id_aspirante, 
+    curp,
+    nombre,
+    apellido_paterno,
+    apellido_materno,
+    correo,
+    fecha_nacimiento,
+    instituto,
+    licenciatura,
+    direccion,
+    codigo_postal,
+    ct_municipio_id,
+    localidad,
+    ct_usuarios_in
+  } = req.body;
+
+  const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+
+  try {
+    modelsValidator(req, res);
+
+    // Buscar el aspirante existente
+    const existingApplicant = await promette.dt_aspirante_aneec.findByPk(id_aspirante);
+    if (!existingApplicant) {
+      // Eliminar archivos subidos si el aspirante no existe
+      const fileFields = [
+        'ruta_ine',
+        'ruta_comprobante_estudio',
+        'ruta_comprobante_domicilio',
+        'ruta_carta_compromiso',
+        'ruta_carta_compromiso_tutor',
+        'ruta_aviso_privacidad_aspirante',
+        'ruta_provacidad_usuario'
+      ];
+      for (const field of fileFields) {
+        if (files[field] && files[field][0]) {
+          fs.unlinkSync(files[field][0].path); // Eliminar archivo subido
+        }
+      }
+      return res.status(404).json({ message: "Aspirante no encontrado" });
+    }
+
+    // Lista de campos de archivos
+    const fileFields = [
+      'ruta_ine',
+      'ruta_comprobante_estudio',
+      'ruta_comprobante_domicilio',
+      'ruta_carta_compromiso',
+      'ruta_carta_compromiso_tutor',
+      'ruta_aviso_privacidad_aspirante',
+      'ruta_provacidad_usuario'
+    ];
+
+    // Eliminar archivos antiguos si se suben nuevos
+    for (const field of fileFields) {
+      if (files[field] && files[field][0]) {
+        if (existingApplicant[field]) {
+          fs.unlinkSync(path.join(__dirname, '..', 'uploads', existingApplicant[field])); // Eliminar archivo antiguo
+        }
+      }
+    }
+
+    // Actualizar los datos del aspirante
+    const updatedApplicant = await existingApplicant.update({
+      curp,
+      nombre,
+      apellido_paterno,
+      apellido_materno,
+      correo,
+      fecha_nacimiento,
+      instituto,
+      licenciatura,
+      direccion,
+      codigo_postal,
+      ct_municipio_id,
+      localidad,
+      ruta_ine: files['ruta_ine'] ? files['ruta_ine'][0].filename : existingApplicant.ruta_ine,
+      ruta_comprobante_estudio: files['ruta_comprobante_estudio'] ? files['ruta_comprobante_estudio'][0].filename : existingApplicant.ruta_comprobante_estudio,
+      ruta_comprobante_domicilio: files['ruta_comprobante_domicilio'] ? files['ruta_comprobante_domicilio'][0].filename : existingApplicant.ruta_comprobante_domicilio,
+      ruta_carta_compromiso: files['ruta_carta_compromiso'] ? files['ruta_carta_compromiso'][0].filename : existingApplicant.ruta_carta_compromiso,
+      ruta_carta_compromiso_tutor: files['ruta_carta_compromiso_tutor'] ? files['ruta_carta_compromiso_tutor'][0].filename : existingApplicant.ruta_carta_compromiso_tutor,
+      ruta_aviso_privacidad_aspirante: files['ruta_aviso_privacidad_aspirante'] ? files['ruta_aviso_privacidad_aspirante'][0].filename : existingApplicant.ruta_aviso_privacidad_aspirante,
+      ruta_provacidad_usuario: files['ruta_provacidad_usuario'] ? files['ruta_provacidad_usuario'][0].filename : existingApplicant.ruta_provacidad_usuario,
+      ct_usuarios_in
+    });
+
+    res.status(200).json({ message: "Aspirante actualizado exitosamente", data: updatedApplicant });
+  } catch (error) {
+    console.error("Error al actualizar el aspirante:", error);
+
+    // Eliminar archivos subidos en caso de error
+    const fileFields = [
+      'ruta_ine',
+      'ruta_comprobante_estudio',
+      'ruta_comprobante_domicilio',
+      'ruta_carta_compromiso',
+      'ruta_carta_compromiso_tutor',
+      'ruta_aviso_privacidad_aspirante',
+      'ruta_provacidad_usuario'
+    ];
+    for (const field of fileFields) {
+      if (files[field] && files[field][0]) {
+        fs.unlinkSync(files[field][0].path); // Eliminar archivo subido
+      }
+    }
+
+    res.status(500).json({ message: "Error al actualizar el aspirante" });
+  }
+};
 
 
 
