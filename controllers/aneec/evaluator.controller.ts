@@ -13,6 +13,7 @@ import { Writable } from 'stream';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import { configureMulterAneec, defineMulterFields } from '../../helpers/aneec.helper';
 
 // Cargar variables de entorno
 dotenv.config();
@@ -47,29 +48,17 @@ export const accesoController = async (req: Request, res: Response,) => {
 
 }
 
-// Configuración de multer para manejar archivos PDF
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, process.env.UPLOAD_BASE_PATH || './');
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, 'diagnostico-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
+// Configura Multer con la ruta base de subida
+const uploadBasePath = process.env.UPLOAD_BASE_PATH || './filediagnostic';
+const upload = configureMulterAneec(uploadBasePath);
 
-const upload = multer({
-  storage: storage,
-  fileFilter: function (req, file, cb) {
-    if (file.mimetype !== 'application/pdf') {
-      return cb(new Error('Solo se permiten archivos PDF'));
-    }
-    cb(null, true);
-  },
-  limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB
-  }
-});
+// Define los campos de Multer si es necesario
+const fields = defineMulterFields([
+  { name: 'diagnostico', maxCount: 1 }
+]);
+
+// Middleware para manejar la subida de archivos
+export const uploadDiagnostico = upload.single('diagnostico');
 
 // Interface para los datos del estudiante
 interface StudentData {
@@ -88,6 +77,10 @@ export const registrarDiagnostico = async (req: Request, res: Response) => {
       return res.status(500).json({ message: "Error de conexión con la base de datos" });
     }
 
+    if (!req.file) {
+      return res.status(400).json({ message: "No se ha subido ningún archivo." });
+    }
+
     const { 
       nombreCompleto, 
       curp, 
@@ -97,6 +90,7 @@ export const registrarDiagnostico = async (req: Request, res: Response) => {
       dt_aspirante_id,
       ruta_diagnostico
     } = req.body;
+
 
     // Validar campos obligatorios
     if (!nombreCompleto || !curp || !tipo_necesidad || !rehabilitacion_fisica || !ct_municipio_id || !dt_aspirante_id) {
@@ -137,6 +131,14 @@ export const registrarDiagnostico = async (req: Request, res: Response) => {
 
   } catch (error) {
     console.error("Error detallado:", error);
+
+    // Verificar si el error es una instancia de Error
+    if (error instanceof Error) {
+      if (error.message === 'La variable de entorno UPLOAD_BASE_PATH no está configurada.') {
+        return res.status(500).json({ message: error.message });
+      }
+    }
+
     return res.status(500).json({ 
       message: "Error al procesar la solicitud",
       error: error instanceof Error ? error.message : "Error desconocido"
@@ -144,5 +146,19 @@ export const registrarDiagnostico = async (req: Request, res: Response) => {
   }
 };
 
-// Middleware para manejar la subida de archivos
-export const uploadDiagnostico = upload.single('diagnostico');
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadPath = process.env.UPLOAD_BASE_PATH || './filediagnostic';
+    
+    // Crear el directorio si no existe y si UPLOAD_BASE_PATH no está definido
+    if (!process.env.UPLOAD_BASE_PATH && !fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+
+    cb(null, uploadPath);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'diagnostico-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
